@@ -34,4 +34,26 @@ const getMyRegistration = asyncHandler(async (req, res) => {
     res.json({ success: true, data: registration });
 });
 
-module.exports = { submitRegistration, getMyRegistration };
+const addCourse = asyncHandler(async (req, res) => {
+    const { registrationId, courseId } = req.body;
+    const registration = await regService.addCourse(req.user.id, { registrationId, courseId });
+
+    res.json({
+        success: true,
+        message: 'Course added successfully.',
+        data: registration
+    });
+});
+
+const dropCourse = asyncHandler(async (req, res) => {
+    const { registrationId, courseId } = req.body;
+    const registration = await regService.dropCourse(req.user.id, { registrationId, courseId });
+
+    res.json({
+        success: true,
+        message: 'Course dropped successfully.',
+        data: registration
+    });
+});
+
+module.exports = { submitRegistration, getMyRegistration, addCourse, dropCourse };

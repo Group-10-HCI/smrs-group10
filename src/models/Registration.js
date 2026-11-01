@@ -39,6 +39,16 @@ const registrationSchema = new mongoose.Schema(
             type: String,
             enum: ['draft', 'submitted', 'pending_approval', 'approved', 'rejected', 'locked'],
             default: 'submitted'
+        },
+        rejectionReason: {
+            type: String
+        }, // Required if rejected
+        reviewedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }, // The officer/admin
+        reviewedAt: {
+            type: Date
         }
     },
     { timestamps: true }
