@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/programmes', programmeRoutes);
 router.use('/courses', courseRoutes);
-router.use('/period', regPeriodRoutes);
+router.use('/periods', regPeriodRoutes);
 
 
 // 404 - runs if no route is matched

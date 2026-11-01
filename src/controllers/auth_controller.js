@@ -2,7 +2,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const authService = require('../services/auth_service');
 const { setAuthCookies, clearAuthCookies, REFRESH_COOKIE } = require('../utils/cookies');
 
-exports.register = asyncHandler(async (req, res) => {
+const register = asyncHandler(async (req, res) => {
     const result = await authService.registerStudent(req.body);
     res.status(201).json({
         success: true,
@@ -11,7 +11,7 @@ exports.register = asyncHandler(async (req, res) => {
     });
 });
 
-exports.login = asyncHandler(async (req, res) => {
+const login = asyncHandler(async (req, res) => {
     const meta = { userAgent: req.headers['user-agent'] };
     const { user, accessToken, refreshToken } = await authService.login(req.body, meta);
     setAuthCookies(res, accessToken, refreshToken);
@@ -27,7 +27,7 @@ exports.login = asyncHandler(async (req, res) => {
     });
 });
 
-exports.refresh = asyncHandler(async (req, res) => {
+const refresh = asyncHandler(async (req, res) => {
     const token = req.cookies?.[REFRESH_COOKIE];
     const meta = { userAgent: req.headers['user-agent'] };
     const { user, accessToken, refreshToken } = await authService.refresh(token, meta);
@@ -38,14 +38,14 @@ exports.refresh = asyncHandler(async (req, res) => {
     });
 });
 
-exports.logout = asyncHandler(async (req, res) => {
+const logout = asyncHandler(async (req, res) => {
     const token = req.cookies?.[REFRESH_COOKIE];
     await authService.logout(req.user?._id, token);
     clearAuthCookies(res);
     res.json({ success: true, message: 'Logged out.' });
 });
 
-exports.me = asyncHandler(async (req, res) => {
+const me = asyncHandler(async (req, res) => {
     const u = req.user;
     res.json({
         success: true,
@@ -61,3 +61,5 @@ exports.me = asyncHandler(async (req, res) => {
         }
     });
 });
+
+module.exports = { register, login, refresh, logout, me };

@@ -2,13 +2,13 @@ const asyncHandler = require('../utils/asyncHandler');
 const Course = require('../models/Course');
 
 // Admin only (FR-010)
-exports.createCourse = asyncHandler(async (req, res) => {
+const createCourse = asyncHandler(async (req, res) => {
     const course = await Course.create(req.body);
     res.status(201).json({ success: true, data: course });
 });
 
 // Anyone can search and filter (FR-013, FR-014)
-exports.getCourses = asyncHandler(async (req, res) => {
+const getCourses = asyncHandler(async (req, res) => {
     const { search, programme, level, semester } = req.query;
 
     // Build query object
@@ -29,3 +29,5 @@ exports.getCourses = asyncHandler(async (req, res) => {
 
     res.json({ success: true, count: courses.length, data: courses });
 });
+
+module.exports = { createCourse, getCourses };
