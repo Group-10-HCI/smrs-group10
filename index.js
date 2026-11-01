@@ -3,6 +3,7 @@ const router = require('express').Router();
 const authRoutes = require('./src/routes/auth_routes');
 const programmeRoutes = require('./src/routes/programme_routes');
 const courseRoutes = require('./src/routes/course_routes');
+const regPeriodRoutes = require('./src/routes/regperiod_routes');
 
 const errorHandler = require('./src/middleware/error_middleware');
 
@@ -22,6 +23,7 @@ router.get('/', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/programmes', programmeRoutes);
 router.use('/courses', courseRoutes);
+router.use('/period', regPeriodRoutes);
 
 
 // 404 - runs if no route is matched
