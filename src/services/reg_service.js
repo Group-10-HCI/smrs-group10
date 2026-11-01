@@ -134,8 +134,66 @@ async function dropCourse(studentId, { registrationId, courseId }) {
     return registration.populate('courses.course', 'code name creditHours');
 }
 
+// View all pending registrations
+async function getPendingRegistrations() {
+    // Find registrations that are 'submitted' or 'pending_approval'
+    const registrations = await Registration.find({
+        status: { $in: ['submitted', 'pending_approval'] }
+    })
+        .populate('student', 'firstName lastName email') // Show student details
+        .populate('courses.course', 'code name creditHours')
+        .sort({ createdAt: 1 }); // Oldest first
+
+    return registrations;
+}
+
+// Approve Registration
+async function approveRegistration(officerId, registrationId) {
+    const registration = await Registration.findById(registrationId);
+
+    if (!registration) throw new ApiError(404, 'Registration not found', 'NOT_FOUND');
+
+    // Can only approve if it's pending
+    if (registration.status !== 'submitted' && registration.status !== 'pending_approval') {
+        throw new ApiError(400, `Cannot approve a registration with status: ${registration.status}`, 'INVALID_STATUS_TRANSITION');
+    }
+
+    registration.status = 'approved';
+    registration.reviewedBy = officerId;
+    registration.reviewedAt = new Date();
+    await registration.save();
+
+    return registration;
+}
+
+// Reject Registration
+async function rejectRegistration(officerId, registrationId, reason) {
+    if (!reason || reason.trim() === '') {
+        throw new ApiError(400, 'A reason must be provided when rejecting a registration.', 'REASON_REQUIRED');
+    }
+
+    const registration = await Registration.findById(registrationId);
+
+    if (!registration) throw new ApiError(404, 'Registration not found', 'NOT_FOUND');
+
+    if (registration.status !== 'submitted' && registration.status !== 'pending_approval') {
+        throw new ApiError(400, `Cannot reject a registration with status: ${registration.status}`, 'INVALID_STATUS_TRANSITION');
+    }
+
+    registration.status = 'rejected';
+    registration.rejectionReason = reason;
+    registration.reviewedBy = officerId;
+    registration.reviewedAt = new Date();
+    await registration.save();
+
+    return registration;
+}
+
 module.exports = {
     submitRegistration,
     addCourse,
-    dropCourse
+    dropCourse,
+    getPendingRegistrations,
+    approveRegistration,
+    rejectRegistration
 };

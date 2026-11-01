@@ -56,4 +56,30 @@ const dropCourse = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { submitRegistration, getMyRegistration, addCourse, dropCourse };
+const getPending = asyncHandler(async (req, res) => {
+    const registrations = await regService.getPendingRegistrations();
+    res.json({ success: true, count: registrations.length, data: registrations });
+});
+
+const approveRegistration = asyncHandler(async (req, res) => {
+    const registration = await regService.approveRegistration(req.user.id, req.params.id);
+    res.json({
+        success: true,
+        message: 'Registration approved successfully.',
+        data: registration
+    });
+});
+
+const rejectRegistration = asyncHandler(async (req, res) => {
+    const { reason } = req.body;
+    const registration = await regService.rejectRegistration(req.user.id, req.params.id, reason);
+    res.json({
+        success: true,
+        message: 'Registration rejected.',
+        data: registration
+    });
+});
+
+module.exports = {
+    submitRegistration, getMyRegistration, addCourse, dropCourse, getPending, approveRegistration, rejectRegistration
+};
