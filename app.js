@@ -1,15 +1,18 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+
 const authRoutes = require('./src/routes/auth_routes');
 const errorHandler = require('./src/middleware/error.middleware');
-const ApiError = require('./src/utils/ApiError');
-const asyncHandler = require('./src/utils/asyncHandler');
-
-// Schemas
-const User = require('./src/models/User');
 
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
 
 //logger
 app.use((req, res, next) => {
@@ -23,10 +26,6 @@ app.get('/', (req, res) => {
         message: 'smrs backend is alive'
     });
 });
-
-app.get('/boom', asyncHandler(async (req, res) => {
-    throw new ApiError(418, 'I am a teapot', 'TEAPOT');
-}));
 
 app.use('/auth', authRoutes);
 
