@@ -3,7 +3,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const authRoutes = require('./src/routes/auth_routes');
-const errorHandler = require('./src/middleware/error.middleware');
+const errorHandler = require('./src/middleware/error_middleware');
 
 const app = express();
 

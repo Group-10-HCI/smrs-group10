@@ -1,5 +1,5 @@
 const asyncHandler = require('../utils/asyncHandler');
-const authService = require('../services/auth.service');
+const authService = require('../services/auth_service');
 const { setAuthCookies, clearAuthCookies, REFRESH_COOKIE } = require('../utils/cookies');
 
 exports.register = asyncHandler(async (req, res) => {

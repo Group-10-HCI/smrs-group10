@@ -5,39 +5,52 @@ const ROLES = ['student', 'registration_officer', 'lecturer', 'admin', 'sysadmin
 
 const userSchema = new mongoose.Schema(
     {
-        username: {
-            type: String,
-            required: true,
-            unique: true,
-            trim: true,
-        },
         email: {
             type: String,
             required: true,
             unique: true,
             lowercase: true,
-            trim: true,
+            trim: true
         },
         passwordHash: {
             type: String,
-            required: true,
+            required: true
         },
         role: {
             type: String,
             enum: ROLES,
-            default: 'student',
+            default: 'student'
         },
-        phone: String,
         status: {
             type: String,
             enum: ['active', 'inactive', 'locked'],
-            default: 'active',
+            default: 'active'
+        },
+        // Names
+        firstName: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        lastName: {
+            type: String,
+            required: false,
+            trim: true
+        },
+        displayName: {
+            type: String,
+            trim: true,
+        },
+        studentNumber: {
+            type: String,
+            unique: true,
+            sparse: true,
+            trim: true
         },
         emailVerified: {
             type: Boolean,
-            default: false,
+            default: false
         },
-
         refreshTokens: [
             {
                 tokenHash: String,
@@ -45,40 +58,35 @@ const userSchema = new mongoose.Schema(
                     type: Date,
                     default: Date.now
                 },
-                userAgent: String,
+                userAgent: String
             }
         ],
-
         locale: {
             type: String,
-            default: 'en',
+            default: 'en'
         },
         accessibilityPrefs: {
             largeText: {
                 type: Boolean,
-                default: false,
+                default: false
             },
             highContrast: {
                 type: Boolean,
-                default: false,
+                default: false
             },
             screenReader: {
                 type: Boolean,
-                default: false,
+                default: false
             }
-        },
-
-        lastLoginAt: Date,
+        }
     },
     { timestamps: true }
 );
 
-// Instance method for hashing and setting passowrd
 userSchema.methods.setPassword = async function (plain) {
     this.passwordHash = await bcrypt.hash(plain, 12);
 };
 
-// Instance method for comparing a plain password with the stored hash password
 userSchema.methods.comparePassword = function (plain) {
     return bcrypt.compare(plain, this.passwordHash);
 };
