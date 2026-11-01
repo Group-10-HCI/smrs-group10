@@ -53,7 +53,20 @@ const createPeriod = asyncHandler(async (req, res) => {
         );
     }
 
-    // If all checks pass, create it
+    // Prevent Duplicate Registration Periods
+    const existingPeriod = await RegistrationPeriod.findOne({
+        academicYear: req.body.academicYear,
+        semester: req.body.semester
+    });
+
+    if (existingPeriod) {
+        throw new ApiError(
+            409,
+            `A registration period for ${req.body.academicYear} Semester ${req.body.semester} already exists.`,
+            'DUPLICATE_PERIOD'
+        );
+    }
+
     const period = await RegistrationPeriod.create(req.body);
     res.status(201).json({ success: true, data: period });
 });

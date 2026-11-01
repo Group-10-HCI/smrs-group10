@@ -23,11 +23,25 @@ async function submitRegistration(studentId, { courseIds, academicYear, semester
         throw new ApiError(409, 'You have already submitted a registration for this semester.', 'DUPLICATE_REGISTRATION');
     }
 
-    // Fetch the selected courses to validate them and calculate credits
+    const uniqueCourseIds = new Set(courseIds);
+    if (uniqueCourseIds.size !== courseIds.length) {
+        throw new ApiError(
+            400,
+            'You have selected the same course more than once. Please review your selection.',
+            'DUPLICATE_COURSES_IN_REQUEST'
+        );
+    }
+
+    // Fetch the selected courses to validate them
     const courses = await Course.find({ _id: { $in: courseIds }, status: 'active' });
 
+    // Check only catches courses that don't exist or are inactive
     if (courses.length !== courseIds.length) {
-        throw new ApiError(400, 'One or more selected courses are invalid or inactive.', 'INVALID_COURSES');
+        throw new ApiError(
+            400,
+            'One or more of the courses you selected do not exist or are currently unavailable.',
+            'UNAVAILABLE_COURSES'
+        );
     }
 
     // Calculate total credits & enforce credit limit 

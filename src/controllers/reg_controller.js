@@ -34,4 +34,4 @@ const getMyRegistration = asyncHandler(async (req, res) => {
     res.json({ success: true, data: registration });
 });
 
-module.exports = { submitRegistration, getMyRegistration }
+module.exports = { submitRegistration, getMyRegistration };

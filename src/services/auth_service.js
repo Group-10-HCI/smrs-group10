@@ -12,6 +12,7 @@ async function registerStudent(data) {
     if (existing) {
         throw new ApiError(409, 'An account with this email already exists', 'DUPLICATE_ACCOUNT');
     }
+    console.log("reached");
 
     const user = new User({
         email: data.email,

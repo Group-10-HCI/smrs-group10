@@ -1,10 +1,14 @@
 const router = require('express').Router();
 
+
+// Routes
 const authRoutes = require('./src/routes/auth_routes');
 const programmeRoutes = require('./src/routes/programme_routes');
 const courseRoutes = require('./src/routes/course_routes');
 const regPeriodRoutes = require('./src/routes/regperiod_routes');
+const regRoutes = require('./src/routes/reg_routes');
 
+// Middleware
 const errorHandler = require('./src/middleware/error_middleware');
 
 //logger
@@ -24,7 +28,7 @@ router.use('/auth', authRoutes);
 router.use('/programmes', programmeRoutes);
 router.use('/courses', courseRoutes);
 router.use('/periods', regPeriodRoutes);
-
+router.use('/registrations', regRoutes)
 
 // 404 - runs if no route is matched
 router.use((req, res) => {
