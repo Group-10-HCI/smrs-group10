@@ -2,8 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
-const authRoutes = require('./src/routes/auth_routes');
-const errorHandler = require('./src/middleware/error_middleware');
+const routes = require('./index');
 
 const app = express();
 
@@ -14,29 +13,6 @@ app.use(cors({
     credentials: true
 }));
 
-//logger
-app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-    next();
-});
-
-// routes
-app.get('/', (req, res) => {
-    res.json({
-        message: 'smrs backend is alive'
-    });
-});
-
-app.use('/auth', authRoutes);
-
-// 404 - runs if no route is matched
-app.use((req, res) => {
-    res.status(404).json({
-        error: 'Route not found'
-    });
-});
-
-// error handler
-app.use(errorHandler);
+app.use('/', routes)
 
 module.exports = app;

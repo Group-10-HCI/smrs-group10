@@ -6,9 +6,9 @@ const { requireRole } = require('../middleware/role_middleware');
 router.use(requireAuth); // Must be logged in
 
 // Admins can create
-router.post('/', requireRole('admin'), ctrl.createProgramme);
+router.post('/createProgramme', requireRole('admin'), ctrl.createProgramme);
 
 // Anyone logged in can view
-router.get('/', ctrl.getProgrammes);
+router.get('/viewProgrammes', ctrl.getProgrammes);
 
 module.exports = router;
