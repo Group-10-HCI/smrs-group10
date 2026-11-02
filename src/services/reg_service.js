@@ -2,6 +2,7 @@ const Registration = require('../models/Registration');
 const Course = require('../models/Course');
 const RegistrationPeriod = require('../models/RegistrationPeriod');
 const ApiError = require('../utils/ApiError');
+const { sendNotification } = require('./notification_service');
 
 const MIN_CREDITS = 12;
 const MAX_CREDITS = 21;
@@ -85,6 +86,13 @@ async function submitRegistration(studentId, { courseIds, academicYear, semester
             status: 'submitted'
         });
     }
+
+    await sendNotification(studentId, {
+        title: 'Registration Submitted',
+        message: `Your registration for ${academicYear} Semester ${semester} has been submitted successfully and is pending review.`,
+        type: 'success',
+        relatedEntity: registration._id
+    });
 
     return registration.populate('courses.course', 'code name creditHours');
 }
@@ -234,6 +242,13 @@ async function approveRegistration(officerId, registrationId) {
     registration.reviewedAt = new Date();
     await registration.save();
 
+    await sendNotification(registration.student, {
+        title: 'Registration Approved',
+        message: `Your registration for ${registration.academicYear} Semester ${registration.semester} has been approved.`,
+        type: 'success',
+        relatedEntity: registration._id
+    });
+
     return registration;
 }
 
@@ -256,6 +271,13 @@ async function rejectRegistration(officerId, registrationId, reason) {
     registration.reviewedBy = officerId;
     registration.reviewedAt = new Date();
     await registration.save();
+
+    await sendNotification(registration.student, {
+        title: 'Registration Rejected',
+        message: `Your registration was rejected. Reason: ${reason}. Please log in to fix the issues and resubmit.`,
+        type: 'error',
+        relatedEntity: registration._id
+    });
 
     return registration;
 }
