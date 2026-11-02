@@ -36,8 +36,7 @@ const getMyRegistration = asyncHandler(async (req, res) => {
 
 const addCourse = asyncHandler(async (req, res) => {
     const { registrationId, courseId } = req.body;
-    const registration = await regService.addCourse(req.user.id, { registrationId, courseId });
-
+    const registration = await regService.addCourse(req.user, { registrationId, courseId });
     res.json({
         success: true,
         message: 'Course added successfully.',
@@ -47,8 +46,7 @@ const addCourse = asyncHandler(async (req, res) => {
 
 const dropCourse = asyncHandler(async (req, res) => {
     const { registrationId, courseId } = req.body;
-    const registration = await regService.dropCourse(req.user.id, { registrationId, courseId });
-
+    const registration = await regService.dropCourse(req.user, { registrationId, courseId });
     res.json({
         success: true,
         message: 'Course dropped successfully.',

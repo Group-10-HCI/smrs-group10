@@ -30,8 +30,13 @@ async function submitRegistration(studentId, { courseIds, academicYear, semester
     await checkRegistrationWindow(academicYear, semester);
 
     const existingReg = await Registration.findOne({ student: studentId, academicYear, semester });
-    if (existingReg) {
-        throw new ApiError(409, 'You have already submitted a registration for this semester.', 'DUPLICATE_REGISTRATION');
+
+    if (existingReg && existingReg.status !== 'rejected') {
+        throw new ApiError(
+            409,
+            'You have already submitted a registration for this semester that is pending or approved.',
+            'DUPLICATE_REGISTRATION'
+        );
     }
 
     const uniqueCourseIds = new Set(courseIds);
@@ -54,26 +59,68 @@ async function submitRegistration(studentId, { courseIds, academicYear, semester
         throw new ApiError(400, `You must register for between ${MIN_CREDITS} and ${MAX_CREDITS} credits. You selected ${totalCredits}.`, 'INVALID_CREDIT_LIMIT');
     }
 
-    const registration = await Registration.create({
-        student: studentId,
-        academicYear,
-        semester,
-        courses: courseDocs,
-        totalCredits,
-        status: 'submitted'
-    });
+    // Save (Update if rejected, Create if new)
+    let registration;
+
+    if (existingReg && existingReg.status === 'rejected') {
+        // Overwrite the rejected registration
+        existingReg.courses = courseDocs;
+        existingReg.totalCredits = totalCredits;
+        existingReg.status = 'submitted';
+
+        // Clear out the old rejection data
+        existingReg.rejectionReason = undefined;
+        existingReg.reviewedBy = undefined;
+        existingReg.reviewedAt = undefined;
+
+        registration = await existingReg.save();
+    } else {
+        // Create a brand new registration
+        registration = await Registration.create({
+            student: studentId,
+            academicYear,
+            semester,
+            courses: courseDocs,
+            totalCredits,
+            status: 'submitted'
+        });
+    }
 
     return registration.populate('courses.course', 'code name creditHours');
 }
 
-async function addCourse(studentId, { registrationId, courseId }) {
-    const registration = await Registration.findOne({ _id: registrationId, student: studentId });
+async function addCourse(user, { registrationId, courseId }) {
+    const registration = await Registration.findById(registrationId);
     if (!registration) {
         throw new ApiError(404, 'Registration record not found.', 'NOT_FOUND');
     }
 
-    // Check if period is still open
-    await checkRegistrationWindow(registration.academicYear, registration.semester);
+    const isAdmin = user.role === 'admin' || user.role === 'registration_officer';
+
+    if (!isAdmin && registration.student.toString() !== user._id.toString()) {
+        throw new ApiError(403, 'You can only modify your own registration.', 'FORBIDDEN');
+    }
+
+    // Only check the window if it's a student
+    if (!isAdmin) {
+        await checkRegistrationWindow(registration.academicYear, registration.semester);
+
+        if (registration.status === 'submitted' || registration.status === 'pending_approval') {
+            throw new ApiError(
+                400,
+                'You cannot modify courses while your registration is pending review. Please wait for approval or rejection.',
+                'REGISTRATION_PENDING'
+            );
+        }
+
+        if (registration.status === 'approved') {
+            throw new ApiError(
+                400,
+                'Your registration is already approved. To make changes, please visit the Academic Registrar\'s office.',
+                'REGISTRATION_APPROVED'
+            );
+        }
+    }
 
     // Check if the course is already in the registration
     const alreadyHasCourse = registration.courses.some(c => c.course.toString() === courseId);
@@ -100,14 +147,38 @@ async function addCourse(studentId, { registrationId, courseId }) {
     return registration.populate('courses.course', 'code name creditHours');
 }
 
-async function dropCourse(studentId, { registrationId, courseId }) {
-    const registration = await Registration.findOne({ _id: registrationId, student: studentId });
+async function dropCourse(user, { registrationId, courseId }) {
+    const registration = await Registration.findById(registrationId);
     if (!registration) {
         throw new ApiError(404, 'Registration record not found.', 'NOT_FOUND');
     }
 
-    // Check if period is still open
-    await checkRegistrationWindow(registration.academicYear, registration.semester);
+    const isAdmin = user.role === 'admin' || user.role === 'registration_officer';
+
+    if (!isAdmin && registration.student.toString() !== user._id.toString()) {
+        throw new ApiError(403, 'You can only modify your own registration.', 'FORBIDDEN');
+    }
+
+    // Only check the window if it's a student
+    if (!isAdmin) {
+        await checkRegistrationWindow(registration.academicYear, registration.semester);
+
+        if (registration.status === 'submitted' || registration.status === 'pending_approval') {
+            throw new ApiError(
+                400,
+                'You cannot modify courses while your registration is pending review. Please wait for approval or rejection.',
+                'REGISTRATION_PENDING'
+            );
+        }
+
+        if (registration.status === 'approved') {
+            throw new ApiError(
+                400,
+                'Your registration is already approved. To make changes, please visit the Academic Registrar\'s office.',
+                'REGISTRATION_APPROVED'
+            );
+        }
+    }
 
     // Find the course in the array
     const courseIndex = registration.courses.findIndex(c => c.course.toString() === courseId);
