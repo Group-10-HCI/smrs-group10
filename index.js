@@ -7,6 +7,7 @@ const programmeRoutes = require('./src/routes/programme_routes');
 const courseRoutes = require('./src/routes/course_routes');
 const regPeriodRoutes = require('./src/routes/regperiod_routes');
 const regRoutes = require('./src/routes/reg_routes');
+const profileRoutes = require('./src/routes/profile_routes');
 
 // Middleware
 const errorHandler = require('./src/middleware/error_middleware');
@@ -29,6 +30,7 @@ router.use('/programmes', programmeRoutes);
 router.use('/courses', courseRoutes);
 router.use('/periods', regPeriodRoutes);
 router.use('/registrations', regRoutes)
+router.use('/profiles', profileRoutes);
 
 // 404 - runs if no route is matched
 router.use((req, res) => {
