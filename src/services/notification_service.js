@@ -32,4 +32,13 @@ async function markAsRead(userId, notificationId) {
     return notification;
 }
 
-module.exports = { sendNotification, getMyNotifications, markAsRead };
+async function deleteNotification(userId, notificationId) {
+    const notification = await Notification.findOneAndDelete({
+        _id: notificationId,
+        recipient: userId
+    });
+
+    return notification;
+}
+
+module.exports = { sendNotification, getMyNotifications, markAsRead, deleteNotification };

@@ -26,4 +26,15 @@ const markAsRead = asyncHandler(async (req, res) => {
     res.json({ success: true, message: 'Notification marked as read.' });
 });
 
-module.exports = { getMyNotifications, markAsRead };
+const deleteNotification = asyncHandler(async (req, res) => {
+    const notification = await notificationService.deleteNotification(req.user._id, req.params.id);
+
+    if (!notification) {
+        // If it returns null, either it doesn't exist OR it belongs to someone else
+        throw new ApiError(404, 'Notification not found.', 'NOT_FOUND');
+    }
+
+    res.json({ success: true, message: 'Notification deleted successfully.' });
+});
+
+module.exports = { getMyNotifications, markAsRead, deleteNotification };
