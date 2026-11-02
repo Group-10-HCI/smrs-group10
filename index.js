@@ -9,6 +9,7 @@ const regPeriodRoutes = require('./src/routes/regperiod_routes');
 const regRoutes = require('./src/routes/reg_routes');
 const profileRoutes = require('./src/routes/profile_routes');
 const dashRoutes = require('./src/routes/dashboard_routes');
+const adminRoutes = require('./src/routes/admin_routes');
 
 // Middleware
 const errorHandler = require('./src/middleware/error_middleware');
@@ -33,6 +34,7 @@ router.use('/periods', regPeriodRoutes);
 router.use('/registrations', regRoutes)
 router.use('/profiles', profileRoutes);
 router.use('/dashboard', dashRoutes);
+router.use('/admin', adminRoutes);
 
 // 404 - runs if no route is matched
 router.use((req, res) => {
