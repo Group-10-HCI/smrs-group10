@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const { globalLimiter } = require('./src/middleware/rate_limit_middleware');
 
 const routes = require('./index');
 
@@ -13,6 +14,6 @@ app.use(cors({
     credentials: true
 }));
 
-app.use('/', routes)
+app.use('/', globalLimiter, routes)
 
 module.exports = app;
