@@ -22,7 +22,7 @@ router.use((req, res, next) => {
 });
 
 
-router.get('/', (req, res) => {
+router.get('/api', (req, res) => {
     res.json({
         message: 'smrs backend is alive and kicking'
     });

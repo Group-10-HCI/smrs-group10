@@ -52,6 +52,7 @@ const me = asyncHandler(async (req, res) => {
         data: {
             id: u._id,
             username: u.username,
+            firstname: u.firstName,
             email: u.email,
             role: u.role,
             status: u.status,

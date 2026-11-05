@@ -14,6 +14,6 @@ app.use(cors({
     credentials: true
 }));
 
-app.use('/', globalLimiter, routes)
+app.use('/api', globalLimiter, routes)
 
 module.exports = app;
